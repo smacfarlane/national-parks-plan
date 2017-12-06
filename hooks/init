@@ -1,10 +1,9 @@
 #!/bin/bash
-
 exec 2>&1
 
 echo "Seeding Mongo Collection"
 
-MONGODB_HOME=$(hab pkg path core/mongo-tools)
+MONGODB_HOME="{{pkgPathFor "core/mongo-tools"}}"
 
 source {{pkg.svc_config_path}}/mongoimport-opts.conf
 echo "\$MONGOIMPORT_OPTS=$MONGOIMPORT_OPTS"
@@ -25,5 +24,15 @@ echo "pkg.svc_files_path    = {{pkg.svc_files_path}}"
 echo "pkg.svc_static_path   = {{pkg.svc_static_path}}"
 echo "pkg.svc_var_path      = {{pkg.svc_var_path}}"
 
-echo ${MONGODB_HOME}/bin/mongoimport --drop -d demo -c nationalparks --type json --jsonArray --file $(hab pkg path {{pkg.origin}}/national-parks)/national-parks.json ${MONGOIMPORT_OPTS}
-${MONGODB_HOME}/bin/mongoimport --drop -d demo -c nationalparks --type json --jsonArray --file $(hab pkg path {{pkg.origin}}/national-parks)/national-parks.json ${MONGOIMPORT_OPTS}
+echo ${MONGODB_HOME}/bin/mongoimport --drop -d demo -c nationalparks --type json --jsonArray --file {{pkg.path}}/national-parks.json ${MONGOIMPORT_OPTS}
+${MONGODB_HOME}/bin/mongoimport --drop -d demo -c nationalparks --type json --jsonArray --file {{pkg.path}}/national-parks.json ${MONGOIMPORT_OPTS}
+
+# Copy tomcat into the service var path
+if [[ ! -d {{pkg.svc_var_path}}/tc ]]; then
+	cp -a {{pkgPathFor "core/tomcat8"}}/tc {{pkg.svc_var_path}}/
+fi
+
+# Install the app
+if [[ ! -d {{pkg.svc_var_path}}/tc/webapps/national-parks ]]; then
+	cp -a {{pkg.path}}/national-parks.war {{pkg.svc_var_path}}/tc/webapps/
+fi

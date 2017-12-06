@@ -5,7 +5,7 @@ pkg_version=0.1.5
 pkg_maintainer="Bill Meyer <bill@chef.io>"
 pkg_license=('Apache-2.0')
 pkg_source=https://github.com/billmeyer/national-parks
-pkg_deps=(core/tomcat8 core/jdk8 core/mongo-tools)
+pkg_deps=(core/tomcat8 core/jre8 core/mongo-tools)
 pkg_build_deps=(core/git core/maven)
 pkg_expose=(8080)
 pkg_svc_user="root"
@@ -64,11 +64,11 @@ do_install()
     # in the package.
 
     local source_dir="${HAB_CACHE_SRC_PATH}/${pkg_dirname}/${pkg_filename}"
-    local webapps_dir="$(hab pkg path core/tomcat8)/tc/webapps"
-    cp ${source_dir}/target/${pkg_filename}.war ${webapps_dir}/
+
+    cp -a "${source_dir}/target/${pkg_filename}.war" "${pkg_prefix}/national-parks.war"
 
     # Copy our seed data so that it can be loaded into Mongo using our init hook
-    cp -v ${source_dir}/national-parks.json ${PREFIX}/
+    cp -v "${source_dir}/national-parks.json" "${pkg_prefix}/"
 }
 
 # We verify our own source code because we cloned from GitHub instead of
